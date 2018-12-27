@@ -10,6 +10,7 @@ struct
 		   if substring(t,0,3)="EOF" then () else do_it()
 	      end
        in do_it();
+    ErrorMsg.reset();
 	  TextIO.closeIn file
       end
 

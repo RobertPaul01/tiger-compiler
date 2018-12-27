@@ -3,6 +3,7 @@ let
   var nil_string: string := nil 
   var empty_string: string := ""
   var a_test_string: string := "testString" 
+/* /* inner */Comment */
 in
 end
 

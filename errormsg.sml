@@ -30,7 +30,7 @@ struct
 
   fun error pos (msg:string) =
       let fun look(a::rest,n) =
-		if a<pos then app print [":",
+		if a <= pos then app print [":",
 				       Int.toString n,
 				       ".",
 				       Int.toString (pos-a)]
