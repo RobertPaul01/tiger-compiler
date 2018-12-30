@@ -1,3 +1,5 @@
+tests/
 modules/
 .cm
 *.lex.sml
+*.swp

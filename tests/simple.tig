@@ -1,9 +1,0 @@
-let
-  var a_test_int := 103
-  var nil_string: string := nil 
-  var empty_string: string := ""
-  var a_test_string: string := "testString" 
-/* /* inner */Comment */
-in
-end
-
