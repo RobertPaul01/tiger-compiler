@@ -3,3 +3,4 @@ modules/
 .cm
 *.lex.sml
 *.swp
+*.grm.*

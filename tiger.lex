@@ -1,10 +1,11 @@
+type svalue = Tokens.svalue
 type pos = int
-type lexresult = Tokens.token
+type ('a,'b) token = ('a,'b) Tokens.token
+type lexresult = (svalue,pos) token
 
 val lineNum = ErrorMsg.lineNum
 val linePos = ErrorMsg.linePos
 fun err(p1,p2) = ErrorMsg.error p1
-
 
 val stringstart = ref 0
 val charlist = ref (nil: char list)
@@ -16,7 +17,7 @@ fun dec x = x := !x - 1
 fun addString (s: char) = charlist := s :: (!charlist)
 fun makeString () = (implode(rev(!charlist)) before charlist := nil)
 
-fun eof() = let val pos = hd(!linePos)
+fun eof () = let val pos = hd(!linePos)
               in 
                 if !comLevel>0 
                   then ErrorMsg.error pos ("unclosed comment")
@@ -24,9 +25,12 @@ fun eof() = let val pos = hd(!linePos)
                Tokens.EOF(pos,pos) 
             end
 
+fun nl yypos = let in lineNum := !lineNum+1; linePos := yypos :: !linePos end
+
 fun makeInt s = foldl (fn (c,a) => a*10 + ord c - ord #"0") 0 (explode s)
 
 %%
+%header (functor TigerLexFun(structure Tokens: Tiger_TOKENS));
 %s STRING COMMENT;
 digits=[0-9]+;
 
@@ -58,7 +62,7 @@ digits=[0-9]+;
 <COMMENT> "/*" => (inc comLevel; continue());
 <COMMENT> "*/" => (dec comLevel; if !comLevel = 0 then YYBEGIN INITIAL else (); continue());
 <COMMENT> . => (continue());
-<COMMENT> \n => (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
+<COMMENT> \n => (nl yypos; continue());
 
 <INITIAL> type => (Tokens.TYPE(yypos,yypos+4));
 <INITIAL> var => (Tokens.VAR(yypos,yypos+3));
@@ -109,7 +113,7 @@ digits=[0-9]+;
 <INITIAL> [a-zA-Z][a-zA-Z0-9_]* => (Tokens.ID(yytext,yypos,yypos+size yytext));
 
 <INITIAL> (" "|"\t") => (continue());
-<INITIAL> \n => (lineNum := !lineNum+1; linePos := yypos :: !linePos; continue());
+<INITIAL> \n => (nl yypos; continue());
 
 <INITIAL> . => (ErrorMsg.error yypos ("illegal character " ^ yytext); continue());
 
