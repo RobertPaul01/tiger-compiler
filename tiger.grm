@@ -11,7 +11,7 @@
   | BREAK | NIL
   | FUNCTION | VAR | TYPE 
 
-%nonterm  exp | program
+%nonterm  exp | program | n_dec | dec | value | n_stmt | stmt
 
 %pos int
 %verbose
@@ -26,13 +26,27 @@
 
 %prefer THEN ELSE LPAREN
 
-%value ID ("bogus")
-%value INT (1)
-%value STRING ("")
+%value ID ("bogus_id")
 
 %%
 
-program	: exp ()
+program: exp ()
 
-exp: ID ASSIGN STRING	()
-  | INT PLUS INT (print("Sum: " ^ Int.toString(INT1+INT2) ^ "\n"))
+exp: LET n_dec IN n_stmt END ()
+
+n_dec: () | dec ()
+
+dec: dec dec ()
+  | VAR ID ASSIGN value ()
+  | VAR ID COLON ID ASSIGN value ()
+  | VAR ID COLON ID ASSIGN value ()
+  | VAR ID COLON ID ASSIGN ID LBRACK INT RBRACK OF value ()
+  | TYPE ID EQ ID ()
+  | TYPE ID EQ ARRAY OF ID ()
+
+value: INT () | STRING (print ("DEBUG: " ^ STRING))
+
+n_stmt: () | stmt ()
+
+stmt: stmt SEMICOLON stmt ()
+  | ID ()
