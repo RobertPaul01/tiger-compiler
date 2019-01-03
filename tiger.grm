@@ -11,7 +11,14 @@
   | BREAK | NIL
   | FUNCTION | VAR | TYPE 
 
-%nonterm  exp | program | n_dec | dec | value | n_stmt | stmt
+%nonterm  
+    program
+  | exp
+  | decs | dec 
+  | tydec | type_id | ty | tyfields
+  | vardec
+  | fundec
+  | value | n_stmt | stmt
 
 %pos int
 %verbose
@@ -32,17 +39,31 @@
 
 program: exp ()
 
-exp: LET n_dec IN n_stmt END ()
+exp: LET decs IN n_stmt END ()
 
-n_dec: () | dec ()
+decs: () | dec ()
 
 dec: dec dec ()
-  | VAR ID ASSIGN value ()
+  | tydec ()
+  | vardec ()
+  | fundec ()
+
+tydec: TYPE type_id EQ ty ()
+  | TYPE ID EQ ARRAY OF ID ()
+
+type_id: ID ()
+
+ty: type_id ()
+  | LBRACE tyfields RBRACE ()
+
+tyfields: () | ID COLON type_id ()
+
+vardec: VAR ID ASSIGN value ()
   | VAR ID COLON ID ASSIGN value ()
   | VAR ID COLON ID ASSIGN value ()
   | VAR ID COLON ID ASSIGN ID LBRACK INT RBRACK OF value ()
-  | TYPE ID EQ ID ()
-  | TYPE ID EQ ARRAY OF ID ()
+ 
+fundec: ()
 
 value: INT () | STRING (print ("DEBUG: " ^ STRING))
 
