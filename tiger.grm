@@ -11,14 +11,14 @@
   | BREAK | NIL
   | FUNCTION | VAR | TYPE 
 
-%nonterm  
+%nonterm
     program
   | exp
-  | decs | dec 
-  | tydec | type_id | ty | tyfields
+  | decs | dec
+  | tydec | type_id | ty | tyfields | tyfield
   | vardec
   | fundec
-  | value | n_stmt | stmt
+  | value
 
 %pos int
 %verbose
@@ -39,35 +39,36 @@
 
 program: exp ()
 
-exp: LET decs IN n_stmt END ()
+exp: LET decs IN ID END ()
 
-decs: () | dec ()
+decs: ()
+  | dec ()
+  | dec dec ()
 
-dec: dec dec ()
-  | tydec ()
+dec:
+    tydec ()
   | vardec ()
   | fundec ()
 
 tydec: TYPE type_id EQ ty ()
-  | TYPE ID EQ ARRAY OF ID ()
 
 type_id: ID ()
 
 ty: type_id ()
   | LBRACE tyfields RBRACE ()
+  | ARRAY OF type_id ()
 
-tyfields: () | ID COLON type_id ()
+tyfields: () | tyfield ()
+
+tyfield: ID COLON type_id ()
+  | ID COLON type_id COMMA tyfield ()
 
 vardec: VAR ID ASSIGN value ()
-  | VAR ID COLON ID ASSIGN value ()
-  | VAR ID COLON ID ASSIGN value ()
-  | VAR ID COLON ID ASSIGN ID LBRACK INT RBRACK OF value ()
- 
-fundec: ()
+  | VAR ID COLON type_id ASSIGN value ()
+  | VAR ID COLON type_id ASSIGN type_id LBRACK value RBRACK OF value ()
+
+fundec: FUNCTION ID LPAREN tyfields RPAREN EQ exp ()
+  | FUNCTION ID LPAREN tyfields RPAREN COLON type_id EQ exp ()
 
 value: INT () | STRING (print ("DEBUG: " ^ STRING))
 
-n_stmt: () | stmt ()
-
-stmt: stmt SEMICOLON stmt ()
-  | ID ()
