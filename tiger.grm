@@ -15,7 +15,6 @@
     program
   | letexp | funexp | funargs
   | exp | expseq
-  | comp | compop
   | decs | dec
   | tydec | ty | tyfields | tyfield
   | vardec
@@ -23,7 +22,8 @@
   | array
   | lvalue | lval
   | record | recfields | recfield
-  | arith | arithop | arithp
+  | arith | arithterm | arithop
+  | comp | compterm | compop
 
 %pos int
 %verbose
@@ -55,14 +55,25 @@ exp: letexp()
   | lvalue ASSIGN exp ()
   | array ()
   | record ()
-  | INT ()
   | STRING ()
   | NIL ()
   | LPAREN RPAREN ()
   | IF exp THEN exp ELSE exp ()
-  | exp arithop exp ()
+  | arith ()
+  | comp ()
 
-comp: exp compop exp ()
+arith: arithterm () | arith arithop arithterm ()
+
+arithterm: INT ()
+
+arithop: PLUS ()
+  | MINUS ()
+  | TIMES ()
+  | DIVIDE ()
+
+comp: compterm compop comp ()
+
+compterm: ID ()
 
 compop: EQ () 
   | LT GT ()
@@ -70,11 +81,6 @@ compop: EQ ()
   | GT ()
   | LT EQ ()
   | GT EQ ()
-
-arithop: PLUS ()
-  | MINUS ()
-  | TIMES ()
-  | DIVIDE ()
 
 array: ID LBRACK exp RBRACK OF exp ()
 
@@ -92,8 +98,8 @@ funexp: ID LPAREN RPAREN ()
 funargs: exp () 
   | exp COMMA funargs ()
 
-decs: ()
-  | dec decs ()
+decs: dec decs ()
+  | ()
 
 dec: tydec ()
   | vardec ()
